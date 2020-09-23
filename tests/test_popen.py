@@ -5,14 +5,14 @@ import pytest
 import dualitee
 
 
-def test_popen_wait(capsys):
+def test_popen_wait(capfd):
     with dualitee.Popen(['env', '--version']) as process:
         returncode = process.wait()
 
         process.stdout.read()
         process.stderr.read()
 
-    stdout_sys, stderr_sys = capsys.readouterr()
+    stdout_sys, stderr_sys = capfd.readouterr()
 
     assert returncode == 0
 
@@ -35,12 +35,12 @@ def test_popen_wait_timeout():
     process.stderr.close()
 
 
-def test_popen_communicate(capsys):
+def test_popen_communicate(capfd):
     with dualitee.Popen(['env', '--version']) as process:
         stdout_buffer, stderr_buffer = process.communicate()
 
     returncode = process.returncode
-    stdout_sys, stderr_sys = capsys.readouterr()
+    stdout_sys, stderr_sys = capfd.readouterr()
 
     assert 'env' in stdout_buffer
     assert stderr_buffer == ''
@@ -66,12 +66,12 @@ def test_popen_communicate_input():
     process.stderr.close()
 
 
-def test_popen_communicate_timeout(capsys):
+def test_popen_communicate_timeout(capfd):
     process = dualitee.Popen(['env', '--version'])
 
     stdout_buffer, stderr_buffer = process.communicate(timeout=3)
     returncode = process.wait()
-    stdout_sys, stderr_sys = capsys.readouterr()
+    stdout_sys, stderr_sys = capfd.readouterr()
 
     assert 'env' in stdout_buffer
     assert stderr_buffer == ''
@@ -97,12 +97,12 @@ def test_popen_communicate_timeout_error():
     process.stderr.close()
 
 
-def test_popen_shell(capsys):
+def test_popen_shell(capfd):
     with dualitee.Popen('env --version', shell=True) as process:
         stdout_buffer, stderr_buffer = process.communicate()
 
     returncode = process.returncode
-    stdout_sys, stderr_sys = capsys.readouterr()
+    stdout_sys, stderr_sys = capfd.readouterr()
 
     assert 'env' in stdout_buffer
     assert stderr_buffer == ''
@@ -113,12 +113,12 @@ def test_popen_shell(capsys):
     assert stderr_sys == ''
 
 
-def test_popen_bash(capsys):
+def test_popen_bash(capfd):
     with dualitee.Popen('echo $SHELL', shell=True, executable='bash') as process:
         stdout_buffer, stderr_buffer = process.communicate()
 
     returncode = process.returncode
-    stdout_sys, stderr_sys = capsys.readouterr()
+    stdout_sys, stderr_sys = capfd.readouterr()
 
     assert 'bash' in stdout_buffer
     assert stderr_buffer == ''
@@ -129,12 +129,12 @@ def test_popen_bash(capsys):
     assert stderr_sys == ''
 
 
-def test_popen_env(capsys):
+def test_popen_env(capfd):
     with dualitee.Popen('echo $VAR', env={'VAR': 'variable'}, shell=True) as process:
         stdout_buffer, stderr_buffer = process.communicate()
 
     returncode = process.returncode
-    stdout_sys, stderr_sys = capsys.readouterr()
+    stdout_sys, stderr_sys = capfd.readouterr()
 
     assert stdout_buffer.rstrip() == 'variable'
     assert stderr_buffer == ''
@@ -145,12 +145,12 @@ def test_popen_env(capsys):
     assert stderr_sys == ''
 
 
-def test_popen_stderr(capsys):
+def test_popen_stderr(capfd):
     with dualitee.Popen('echo error >&2', shell=True) as process:
         stdout_buffer, stderr_buffer = process.communicate()
 
     returncode = process.returncode
-    stdout_sys, stderr_sys = capsys.readouterr()
+    stdout_sys, stderr_sys = capfd.readouterr()
 
     assert stdout_buffer == ''
     assert stderr_buffer.rstrip() == 'error'
